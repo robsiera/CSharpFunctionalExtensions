@@ -148,6 +148,22 @@ namespace CSharpFunctionalExtensions
             return result;
         }
 
+        /// <summary>
+        /// OnFailure of the previous result, an Action is executed that takes that result as parameter.
+        /// </summary>
+        /// <returns>  The previous result is being returned</returns>
+        /// <remarks>  Useful for logging</remarks>
+        /// <example>  .OnFailure(result => _logger.Log(result)) </example>
+        public static Result<T> OnFailure<T>(this Result<T> result, Action<Result<T>> action)
+        {
+            if (result.IsFailure)
+            {
+                action(result);
+            }
+
+            return result;
+        }
+
         public static Result<T> OnFailure<T>(this Result<T> result, Action<string> action)
         {
             if (result.IsFailure)
