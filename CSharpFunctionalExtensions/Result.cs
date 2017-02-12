@@ -87,6 +87,12 @@ namespace CSharpFunctionalExtensions
             return new Result<T>(true, default(T), error);
         }
 
+        [DebuggerStepThrough]
+        public static Result<T> Fail<T>(Exception error)
+        {
+            return new Result<T>(true, default(T), error.Message);
+        }
+
         /// <summary>
         /// Returns first failure in the list of <paramref name="results"/>. If there is no failure returns success.
         /// </summary>

@@ -4,6 +4,14 @@ namespace CSharpFunctionalExtensions
 {
     public static class ResultExtensions
     {
+        public static Result<K> StartValidation<T, K>(this T payload, Func<T, Result<K>> func) where T : class
+        {
+            var startResult = Maybe<T>.From(payload).ToResult<T>("Payload was not provided");
+            return startResult.OnSuccess(func);
+        }
+
+        #region OnSuccess Functions (no side effects)
+
         public static Result<K> OnSuccess<T, K>(this Result<T> result, Func<T, K> func)
         {
             if (result.IsFailure)
@@ -60,6 +68,10 @@ namespace CSharpFunctionalExtensions
             return func();
         }
 
+        #endregion
+
+        #region Ensure
+
         public static Result<T> Ensure<T>(this Result<T> result, Func<T, bool> predicate, string errorMessage)
         {
             if (result.IsFailure)
@@ -82,6 +94,10 @@ namespace CSharpFunctionalExtensions
             return Result.Ok();
         }
 
+        #endregion
+
+        #region Map
+
         public static Result<K> Map<T, K>(this Result<T> result, Func<T, K> func)
         {
             if (result.IsFailure)
@@ -98,7 +114,11 @@ namespace CSharpFunctionalExtensions
             return Result.Ok(func());
         }
 
-        public static Result<T> OnSuccess<T>(this Result<T> result, Action<T> action)
+        #endregion
+
+        #region OnSuccess Actions (create side effects)
+
+        public static Result<T> OnSuccess<T>(this Result<T> result, string desc, Action<T> action)
         {
             if (result.IsSuccess)
             {
@@ -106,6 +126,10 @@ namespace CSharpFunctionalExtensions
             }
 
             return result;
+        }
+        public static Result<T> OnSuccess<T>(this Result<T> result, Action<T> action)
+        {
+            return result.OnSuccess("", action);
         }
 
         public static Result OnSuccess(this Result result, Action action)
@@ -118,15 +142,28 @@ namespace CSharpFunctionalExtensions
             return result;
         }
 
+        #endregion
+
+        #region OnBoth
+
         public static T OnBoth<T>(this Result result, Func<Result, T> func)
+        {
+            return func(result);
+        }
+
+        public static K OnBoth<T, K>(this Result<T> result, string desc, Func<Result<T>, K> func)
         {
             return func(result);
         }
 
         public static K OnBoth<T, K>(this Result<T> result, Func<Result<T>, K> func)
         {
-            return func(result);
+            return result.OnBoth("", func);
         }
+
+        #endregion
+
+        #region OnFailure
 
         public static Result<T> OnFailure<T>(this Result<T> result, Action action)
         {
@@ -154,7 +191,7 @@ namespace CSharpFunctionalExtensions
         /// <returns>  The previous result is being returned</returns>
         /// <remarks>  Useful for logging</remarks>
         /// <example>  .OnFailure(result => _logger.Log(result)) </example>
-        public static Result<T> OnFailure<T>(this Result<T> result, Action<Result<T>> action)
+        public static Result<T> OnFailure<T>(this Result<T> result, string desc, Action<Result<T>> action)
         {
             if (result.IsFailure)
             {
@@ -162,6 +199,11 @@ namespace CSharpFunctionalExtensions
             }
 
             return result;
+        }
+
+        public static Result<T> OnFailure<T>(this Result<T> result, Action<Result<T>> action)
+        {
+            return result.OnFailure("", action);
         }
 
         public static Result<T> OnFailure<T>(this Result<T> result, Action<string> action)
@@ -173,5 +215,7 @@ namespace CSharpFunctionalExtensions
 
             return result;
         }
+
+        #endregion
     }
 }
