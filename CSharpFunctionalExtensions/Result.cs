@@ -132,6 +132,11 @@ namespace CSharpFunctionalExtensions
         {
             return Combine(", ", results);
         }
+
+        public static Result<T> Either<T>(bool isSuccess, T successValue, string errorValue)
+        {
+            return isSuccess ? Result.Ok(successValue) : Result.Fail<T>(errorValue);
+        }
     }
 
 
